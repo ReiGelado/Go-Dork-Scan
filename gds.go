@@ -19,7 +19,8 @@ func erro(e error){
 }
 func banner(){
 	fmt.Println("[+]Go Dork Scan Beta v0.1 by ReiGel_ado")
-	fmt.Println("[+]Buscadores Disponiveis:\n[+]Bing\n[+]Google(Futuramente)\n")
+	fmt.Println("[+]Forum:http://caveiratech.com/forum/")
+	fmt.Println("[+]Buscadores Disponiveis:\n[+]Bing\n[+]Google(Futuramente)")
 	flag.StringVar(&dork_comando,"dork","noticia.php?id=1"," - Sua Dork")
 	flag.Parse() //Carega os argumentos
 }
@@ -44,7 +45,6 @@ func main() {
 	banner()
 	recebe_download := html_download("http://www.bing.com/search?q=",dork_comando)
 	escreve(recebe_download,"html.txt")
-	//fmt.Println(recebe_download)
 	regex := regexp.MustCompile("</li><li class=\"b_algo\"><h2><a href=\"(.*?)\" h=\"ID=SERP,")
 	result := regex.FindAllStringSubmatch(recebe_download,-1)[0:]
 	for i := 1; i <= 9; i++ { //Retorna [(completo,url)]
