@@ -1,5 +1,6 @@
-# Go Dork Scan Beta v0.2
+# Go Dork Scan Beta
 Um script simples que tem a função de usar buscadores para retornar dorks.
+<br><b><i>Versão do Script : 0.2 <br></b></i>
 # Usage:
 <b>Compilado:</b>
 <br><code>arthur@arthur-netbook:~$./gds -dork=noticia.php?id=</code>
