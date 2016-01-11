@@ -21,4 +21,4 @@ Um script simples que tem a função de usar buscadores para retornar dorks.
 <br><i>Obs:No argymento -buscador vocẽ pode usar o "bing" tambem!</i>
 <br><img src="http://i.imgur.com/ER9uv0g.png?1" ></img>
 <b>Comando:</b>gds.go -update
-<br><img src=""></img>
+<br><img src="http://i.imgur.com/uJNHYBc.png?1"></img>
