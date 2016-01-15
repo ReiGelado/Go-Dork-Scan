@@ -18,9 +18,18 @@ var update_comando *bool
 var buscador_comando string
 var versao_script float64
 var versao_script_string string
+var result []string
+var resultado_slice_1 []string //Vou otimizar isso depois kkkk
+var resultado_slice_2 []string
+var resultado_slice_3 []string
+var resultado_slice_4 []string
+var resultado_slice_5 []string
 var regex_bing string
 var regex_google string
 var regex_update string
+var regex_duckduckgo string
+var regex_yahoo string
+var regex_ask string
 
 func erro(e error){
 	if e != nil{
@@ -29,11 +38,11 @@ func erro(e error){
 }
 func banner(){
 	fmt.Println("[+]Go Dork Scan v" + versao_script_string + " by ReiGel_ado")
-	fmt.Println("[+]Buscadores Disponiveis:\n[+]Bing\n[+]Google")
+	fmt.Println("\n[+]Buscadores Disponiveis:\n[+]Bing\n[+]Google\n[+]DuckDuckGo(Sem Paginas)\n[+]Yahoo\n[+]Ask\n")
 }
 func argumentos_variaveis(){
-	versao_script = 0.3
-	versao_script_string = "0.3"
+	versao_script = 0.4
+	versao_script_string = "0.4"
 	flag.StringVar(&dork_comando,"dork","noticia.php?id=1"," - Sua Dork!")
 	flag.StringVar(&buscador_comando,"buscador","bing"," - Buscador para puxar as dorks!")
 	flag.IntVar(&paginas_comando,"paginas",1," - Numero de paginas para o script acessar!")
@@ -44,7 +53,7 @@ func escreve(valor string,arquivo string){ //implementação futura,não ligue p
 	wa , err := os.Create(arquivo)
 	erro(err)
 	defer wa.Close()
-	wa.WriteString(valor)
+	wa.WriteString(valor + "\n")
 	wa.Sync()
 }
 func html_download(url_site string) string {
@@ -87,13 +96,12 @@ func update(versao string){
 	}
 }
 func bing(paginas int) []string {
-	var resultado_slice_1 []string
 	regex_bing = "</li><li class=\"b_algo\"><h2><a href=\"(.*?)\" h=\"ID=SERP,"
 	dork_escaped := url.QueryEscape(dork_comando)
 	if paginas <= 1 {
 		recebe_download := html_download("http://www.bing.com/search?q=" + dork_escaped)
 		resultado := parser(recebe_download,regex_bing)
-		for i := 0; i < 10; i++ {
+		for i := range resultado{
 			resultado_slice_1 = append(resultado_slice_1,resultado[i][1])
 		}
 	} else if paginas > 1 {
@@ -102,7 +110,7 @@ func bing(paginas int) []string {
 			url_paginas := ("http://www.bing.com/search?q=" + dork_escaped + "&first=" + pa_str + "1" ) //url pa bing
 			recebe_download := html_download(url_paginas)
 			resultado := parser(recebe_download,regex_bing)
-			for i := 0; i < 10; i++ {
+			for i := range resultado{
 				resultado_slice_1 = append(resultado_slice_1,resultado[i][1])	
 			}
 		}
@@ -110,13 +118,12 @@ func bing(paginas int) []string {
 	return resultado_slice_1
 }
 func google(paginas int) []string {
-	var resultado_slice_2 []string
 	regex_google = `"><a href="/url\?q=(.*?)&amp;sa=U&amp;`
 	dork_escaped := url.QueryEscape(dork_comando)
 	if paginas <=1 {
 		recebe_download := html_download("https://www.google.com.br/search?q=" + dork_escaped)
 		resultado := parser(recebe_download,regex_google)
-		for i := 0 ; i < 10; i++{
+		for i := range resultado{
 			url_unescaped,err := url.QueryUnescape(resultado[i][1])
 			erro(err)
 			resultado_slice_2 = append(resultado_slice_2,url_unescaped)
@@ -127,7 +134,7 @@ func google(paginas int) []string {
 			url_paginas := ("https://www.google.com.br/search?q=" + dork_escaped + "&start=" + pa_str + "0")//ulr pa google
 			recebe_download := html_download(url_paginas)
 			resultado := parser(recebe_download,regex_google)
-			for i := 0; i < 9;i++{
+			for i := range resultado{
 				url_unescaped,err := url.QueryUnescape(resultado[i][1])
 				erro(err)
 				resultado_slice_2 = append(resultado_slice_2,url_unescaped)
@@ -135,6 +142,67 @@ func google(paginas int) []string {
 		}
 	}
 	return resultado_slice_2
+}
+func meu_pato(paginas int)[]string{
+	regex_duckduckgo = `<a rel=\"nofollow\" href=\"(.*?)\">`
+	dork_escaped := url.QueryEscape(dork_comando)
+	if paginas <= 1 {
+		recebe_download := html_download("https://duckduckgo.com/html/?q=" + dork_escaped)
+		resultado := parser(recebe_download,regex_duckduckgo)
+		for i := range resultado{
+			url_unescaped,err := url.QueryUnescape(resultado[i][1])
+			erro(err)
+			resultado_slice_3 = append(resultado_slice_3,url_unescaped)
+		}
+	}else if paginas >1 {
+		fmt.Println("[+]Pensando em como implementar paginas no Duck 0-0!")
+		return nil
+	}
+	return resultado_slice_3
+}
+func yahoo(paginas int)[]string{
+	regex_yahoo = `\" ac-algo ac-21th lh-15\" href=\"(.*?)\" target=\"_blank`
+	dork_escaped := url.QueryEscape(dork_comando)
+	if paginas <= 1{
+		recebe_download := html_download("https://search.yahoo.com/search?p=" + dork_escaped)
+		resultado := parser(recebe_download,regex_yahoo)
+		for i := range resultado{
+			resultado_slice_4 = append(resultado_slice_4,resultado[i][1])
+		}
+	}else if paginas > 1{
+		for pa := 1;pa <= paginas;pa++{
+			pa_str := strconv.Itoa(pa)
+			url_paginas := ("https://search.yahoo.com/search?p=" + dork_escaped + "&ei=UTF-8&b=" + pa_str + "1")
+			recebe_download := html_download(url_paginas)
+			resultado := parser(recebe_download,regex_yahoo)
+			for i := range resultado{
+				resultado_slice_4 = append(resultado_slice_4,resultado[i][1])
+			}
+		}
+	}
+	return resultado_slice_4
+}
+func ask(paginas int)[]string{
+	regex_ask = `<a class=\"web-result-title-link\" href=\"(.*?)\" onmousedown=\"uaction\(this`
+	dork_escaped := url.QueryEscape(dork_comando)
+	if paginas <= 1{
+		recebe_download := html_download("http://www.ask.com/web?q=" + dork_escaped)
+		resultado := parser(recebe_download,regex_ask)
+		for i := range resultado{
+			resultado_slice_5 = append(resultado_slice_5,resultado[i][1])
+		}
+	}else if paginas > 1{
+		for pa := 1;pa <= paginas;pa++{
+			pa_str := strconv.Itoa(pa)
+			url_paginas := ("http://www.ask.com/web?q=" + dork_escaped + "&page=" + pa_str)
+			recebe_download := html_download(url_paginas)
+			resultado := parser(recebe_download,regex_ask)
+			for i := range resultado{
+				resultado_slice_5 = append(resultado_slice_5,resultado[i][1])
+			}
+		}
+	}
+	return resultado_slice_5
 }
 func main() {
 	argumentos_variaveis()
@@ -144,16 +212,17 @@ func main() {
 		os.Exit(0)
 	}
 	if buscador_comando == "google"{
-		result := google(paginas_comando)
-		fmt.Println("[+]Resultado:")
-		for i := 0;i < len(result);i++{
-			fmt.Println("[+]Link:",result[i])
-		}
+		result = google(paginas_comando)
 	}else if buscador_comando == "bing"{
-		result := bing(paginas_comando)
-		fmt.Println("[+]Resultado:")
-		for i := 0;i < len(result);i++{
-			fmt.Println("[+]Link:",result[i])
+		result = bing(paginas_comando)
+	}else if buscador_comando == "duck"{
+		result = meu_pato(paginas_comando)
+	}else if buscador_comando == "yahoo"{
+		result = yahoo(paginas_comando)
+	}else if buscador_comando == "ask"{
+		result = ask(paginas_comando)
 	}
-}
+	for i := range result{
+		fmt.Println("[+]Link:",result[i])
+	}
 }
