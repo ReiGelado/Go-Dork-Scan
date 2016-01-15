@@ -1,6 +1,6 @@
 # Go Dork Scan Beta
 Um script simples que tem a função de usar buscadores para retornar dorks.
-<br><b><i>Versão do Script : 0.3 <br></b></i>
+<br><b><i>Versão do Script : 0.4 <br></b></i>
 # Dependencias:
 <b>Para usar o script você deve instalar a linguagem de programação golang,no ubuntu vocẽ pode instalar ela com<br>
 o seguinte comando:</b>
@@ -22,7 +22,11 @@ o seguinte comando:</b>
 <b>Comando:</b>>gds.go -dork=noticia.php?id= -paginas=2
 <br><img src="http://i.imgur.com/UlhMyxf.png?1"></img>
 <b>Comando:</b>gds.go -dork=noticia.php?id= -buscador=google -paginas=2
-<br><i>Obs:No argymento -buscador vocẽ pode usar o "bing" tambem!</i>
+<br><i>Buscadores disponiveis:</i><b>bing</b>,<b>google</b>,<b>ask</b>,<b>duck</b>
 <br><img src="http://i.imgur.com/ER9uv0g.png?1" ></img>
+<b><b>Prints:</b>
+<br><img src ="http://i.imgur.com/mjqDzX2.png?1"></img>
+<br><img src ="http://i.imgur.com/oeq1eFf.png?1"></img>
+<br><img src ="http://i.imgur.com/FS1EG2U.png?1"></img>
 <b>Comando:</b>gds.go -update
 <br><img src="http://i.imgur.com/uJNHYBc.png?1"></img>
