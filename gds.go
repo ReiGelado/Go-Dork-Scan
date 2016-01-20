@@ -16,6 +16,9 @@ var dork_comando string
 var paginas_comando int
 var update_comando *bool
 var buscador_comando string
+var saida_comando string
+var proxy_comando string
+var useragent_comando string
 var versao_script float64
 var versao_script_string string
 var result []string
@@ -41,27 +44,48 @@ func banner(){
 	fmt.Println("\n[+]Buscadores Disponiveis:\n[+]Bing\n[+]Google\n[+]DuckDuckGo(Sem Paginas)\n[+]Yahoo\n[+]Ask\n")
 }
 func argumentos_variaveis(){
-	versao_script = 0.4
-	versao_script_string = "0.4"
 	flag.StringVar(&dork_comando,"dork","noticia.php?id=1"," - Sua Dork!")
 	flag.StringVar(&buscador_comando,"buscador","bing"," - Buscador para puxar as dorks!")
+	flag.StringVar(&saida_comando,"saida","false"," - Um saida para as dorks!")
+	flag.StringVar(&useragent_comando,"user-agent","false"," - Modifica o user-agent do script!")
+	//flag.StringVar(&proxy_comando,"proxy","false"," - Seta um proxy no script(BETA)!")
 	flag.IntVar(&paginas_comando,"paginas",1," - Numero de paginas para o script acessar!")
 	update_comando = flag.Bool("update",false," - Verifica atualizações do script!")
 	flag.Parse() //Carega os argumentos
+	versao_script = 0.5
+	versao_script_string = "0.5"
+	if useragent_comando == "false"{
+		useragent_comando = "Go-http-client/1.1"
+	}else {
+		fmt.Println("[+]User-Agent : " + useragent_comando)
+		fmt.Println("[+]Lembrando que o User-Agent influencia no resultado das DORKS!\n")
+	}
 }
-func escreve(valor string,arquivo string){ //implementação futura,não ligue pro arquivo criado...
-	wa , err := os.Create(arquivo)
+func escreve_slice(nome_do_arquivo string,array_slice []string){
+	arquivo_w,err := os.Create(nome_do_arquivo)
 	erro(err)
-	defer wa.Close()
-	wa.WriteString(valor + "\n")
-	wa.Sync()
+	defer arquivo_w.Close()
+	for i := range array_slice{
+		arquivo_w.WriteString(array_slice[i] + "\n")
+	}
+	arquivo_w.Sync()
+	if _, err := os.Stat(nome_do_arquivo); err == nil { 
+		fmt.Println("\n[+]Dork Salvas em :" + nome_do_arquivo)
+	} else if err != nil {
+		fmt.Println("[+]Ocorreu um erro na escrita do arquivo....")
+		erro(err)
+	}
 }
 func html_download(url_site string) string {
-	html_down,erro_down := http.Get(url_site)
-	erro(erro_down)
+	navegador := &http.Client{}
+	cabecalho , err := http.NewRequest("GET",url_site, nil)
+	erro(err)
+	cabecalho.Header.Set("User-Agent",useragent_comando)
+	html_down,err := navegador.Do(cabecalho)
+	erro(err)
 	defer html_down.Body.Close()
-	html_body,body_erro := ioutil.ReadAll(html_down.Body)
-	erro(body_erro)
+	html_body,err := ioutil.ReadAll(html_down.Body)
+	erro(err)
 	string_body := string(html_body)
 	return string_body
 }
@@ -93,6 +117,7 @@ func update(versao string){
 		erro(err)
 		_ = escreve_arquivo
 		fmt.Println("[+]Download da nova atualização completo!")
+		fmt.Println("[+]Verifique o arquivo master.zip !")
 	}
 }
 func bing(paginas int) []string {
@@ -118,10 +143,12 @@ func bing(paginas int) []string {
 	return resultado_slice_1
 }
 func google(paginas int) []string {
+	fmt.Println("[+]Buscador Google em função beta...")
+	fmt.Println("[+]CAPTCHA aparece de vez em quando...")
 	regex_google = `"><a href="/url\?q=(.*?)&amp;sa=U&amp;`
 	dork_escaped := url.QueryEscape(dork_comando)
 	if paginas <=1 {
-		recebe_download := html_download("https://www.google.com.br/search?q=" + dork_escaped)
+		recebe_download := html_download("https://www.google.com.br/search?q=" + dork_escaped + "&oq="+ dork_escaped + "&gws_rd=cr,ssl&client=ubuntu&ie=UTF-8")
 		resultado := parser(recebe_download,regex_google)
 		for i := range resultado{
 			url_unescaped,err := url.QueryUnescape(resultado[i][1])
@@ -205,8 +232,8 @@ func ask(paginas int)[]string{
 	return resultado_slice_5
 }
 func main() {
-	argumentos_variaveis()
 	banner()
+	argumentos_variaveis()
 	if *update_comando == true{
 		update(versao_script_string)
 		os.Exit(0)
@@ -224,5 +251,8 @@ func main() {
 	}
 	for i := range result{
 		fmt.Println("[+]Link:",result[i])
+	}
+	if saida_comando != "false"{//poise....
+		escreve_slice(saida_comando,result)
 	}
 }
